@@ -12,17 +12,28 @@ import java.util.stream.Stream;
 
 import static ec.edu.espe.pa.funcional.reglas.ReglasIncidencia.*;
 
+// =========================================================================================
+// ==== CLASE DEMOSTRACION: FASES 2, 3 Y 5 ====
+// Centraliza las demostraciones prácticas de interfaces funcionales, sintaxis de lambdas,
+// formas de implementar contratos propios, composición y referencias a métodos.
+// =========================================================================================
 public class Demostracion {
 
     public static void main(String[] args) {
 
-        // 1. Las cuatro interfaces funcionales estándar
+        // =========================================================================================
+        // ==== FASE 2: DEMOSTRACIÓN - LAS CUATRO INTERFACES ESTÁNDAR Y SINTAXIS LAMBDA ====
+        // 1. Definición de las 4 interfaces principales de java.util.function
+        // =========================================================================================
         Predicate<Incidencia> estaAbierta = incidencia -> "ABIERTA".equals(incidencia.estado());
         Function<Incidencia, String> obtenerResumen = incidencia -> incidencia.id() + " - " + incidencia.titulo();
         Consumer<Incidencia> mostrar = incidencia -> System.out.println(incidencia.titulo());
         Supplier<Incidencia> crearEjemplo = () -> new Incidencia("INC-001", "Error de acceso", "ABIERTA", 3);
 
-        // 2. Invocación de las interfaces y impresión de cada resultado
+        // =========================================================================================
+        // ==== EN ESTE BLOQUE SE REALIZA: INVOCACIÓN DE MÉTODOS ABSTRACTOS DE CADA INTERFAZ ====
+        // Supplier -> get(), Predicate -> test(), Function -> apply(), Consumer -> accept()
+        // =========================================================================================
         Incidencia ejemplo = crearEjemplo.get();
         boolean abierta = estaAbierta.test(ejemplo);
         String resumen = obtenerResumen.apply(ejemplo);
@@ -33,7 +44,10 @@ public class Demostracion {
         System.out.println("Título impreso por el Consumer:");
         mostrar.accept(ejemplo);
 
-        // 3. Sintaxis de lambdas
+        // =========================================================================================
+        // ==== EN ESTE BLOQUE SE REALIZA: VARIANTES SINTÁCTICAS DE EXPRESIONES LAMBDA ====
+        // Demuestra expresión directa, bloque con return, tipos explícitos e inferencia con var.
+        // =========================================================================================
         Predicate<Incidencia> altaExpresion = i -> i.prioridad() >= 4;
         Predicate<Incidencia> altaBloque = i -> {
             int p = i.prioridad();
@@ -47,14 +61,20 @@ public class Demostracion {
         System.out.println("Tipo declarado (Incidencia i) (prioridad >= 4): " + altaTipoDeclarado.test(ejemplo));
         System.out.println("Tipo declarado (var i) (prioridad >= 4): " + altaVar.test(ejemplo));
 
-        // 4. Captura de variables efectivamente finales
+        // =========================================================================================
+        // ==== EN ESTE BLOQUE SE REALIZA: CAPTURA DE VARIABLES EFECTIVAMENTE FINALES ====
+        // Las variables locales capturadas por una lambda no deben ser reasignadas en el método.
+        // =========================================================================================
         int umbral = 4;
         Predicate<Incidencia> superaUmbral = i -> i.prioridad() >= umbral;
-        // umbral = 5; // Si se descomenta, no compila: "local variables referenced from a lambda expression must be final or effectively final"
+        // umbral = 5; // Si se descomenta, no compila: variable must be final or effectively final
 
         System.out.println("Captura de umbral (" + umbral + ") (prioridad >= umbral): " + superaUmbral.test(ejemplo));
 
-        // Fase 3: formas de implementar ReglaIncidencia
+        // =========================================================================================
+        // ==== FASE 3: CONTRATO PROPIO - FORMAS 2 Y 3 DE IMPLEMENTACIÓN ====
+        // Implementación con clase anónima y con expresión lambda sobre ReglaIncidencia.
+        // =========================================================================================
 
         // 2) Clase anónima
         ReglaIncidencia abiertaAnonima = new ReglaIncidencia() {
@@ -67,7 +87,10 @@ public class Demostracion {
         // 3) Expresión lambda
         ReglaIncidencia abiertaLambda = incidencia -> "ABIERTA".equals(incidencia.estado());
 
-        // Combinación con el método default y adaptación a Predicate mediante referencia a método
+        // =========================================================================================
+        // ==== EN ESTE BLOQUE SE REALIZA: COMBINACIÓN Y ADAPTACIÓN A PREDICATE ====
+        // Usa método default .y() y referencia a método de instancia requiereAtencion::evaluar.
+        // =========================================================================================
         ReglaIncidencia requiereAtencion = abiertaLambda.y(new PrioridadAlta());
         Predicate<Incidencia> comoPredicado = requiereAtencion::evaluar;
 
@@ -76,7 +99,10 @@ public class Demostracion {
         System.out.println("Regla combinada y() sobre el ejemplo: " + requiereAtencion.evaluar(ejemplo));
         System.out.println("Regla adaptada a Predicate sobre el ejemplo: " + comoPredicado.test(ejemplo));
 
-        // Autoverificación con dos incidencias
+        // =========================================================================================
+        // ==== EN ESTE BLOQUE SE REALIZA: AUTOVERIFICACIÓN DE LAS TRES FORMAS ====
+        // Compara que la clase con nombre, la anónima y la lambda producen el mismo resultado.
+        // =========================================================================================
         Incidencia abiertaUrgente = new Incidencia("INC-002", "Caída del sistema", "ABIERTA", 5);
         Incidencia cerradaBaja = new Incidencia("INC-003", "Cambio de contraseña", "CERRADA", 2);
 
@@ -98,7 +124,10 @@ public class Demostracion {
         System.out.println("  requiereAtencion.evaluar: " + requiereAtencion.evaluar(cerradaBaja));
         System.out.println("  comoPredicado.test: " + comoPredicado.test(cerradaBaja));
 
-        // Fase 4: reglas reutilizables en ReglasIncidencia
+        // =========================================================================================
+        // ==== FASE 4: DEMOSTRACIÓN DE REGLAS REUTILIZABLES ====
+        // Ejecución de la función CATEGORIA, filtros y generación sintética con Supplier.
+        // =========================================================================================
         System.out.println("CATEGORIA por prioridad:");
         for (int p = 1; p <= 5; p++) {
             Incidencia porPrioridad = new Incidencia("INC-P" + p, "Prioridad " + p, "ABIERTA", p);
@@ -125,10 +154,14 @@ public class Demostracion {
         System.out.println("NOTIFICAR sobre el ejemplo:");
         NOTIFICAR.accept(ejemplo);
 
-        // Fase 5: composición de funciones y referencias a método
+        // =========================================================================================
+        // ==== FASE 5: COMPOSICIÓN DE FUNCIONES Y REFERENCIAS A MÉTODOS ====
+        // Demuestra composición de Predicate (negate, and, or), Function (andThen, compose) y Consumer.
+        // =========================================================================================
 
         // Predicate: and, or, negate
         Predicate<Incidencia> noAbierta     = ESTA_ABIERTA.negate();
+        // ==== FASE 5: SE COMPLETÓ EL TODO DE pendienteBaja CON AND Y NEGATE ====
         Predicate<Incidencia> pendienteBaja = ESTA_ABIERTA.and(PRIORIDAD_ALTA.negate()); // abiertas que NO son de prioridad alta
         Predicate<Incidencia> revisarHoy    = REQUIERE_ATENCION.or(i -> i.prioridad() == 5);
 
@@ -143,7 +176,7 @@ public class Demostracion {
         Consumer<Incidencia> registrar = i -> bitacora.add(i.id());
         Consumer<Incidencia> notificarYRegistrar = NOTIFICAR.andThen(registrar);
 
-        // Lista de prueba (antes de las referencias a métodos)
+        // Lista de incidencias de prueba para evaluar composición y referencias
         List<Incidencia> incidencias = List.of(
                 new Incidencia("INC-006", "Crítica abierta", "ABIERTA", 5),
                 new Incidencia("INC-007", "Abierta baja", "ABIERTA", 2),
@@ -151,8 +184,12 @@ public class Demostracion {
                 new Incidencia("INC-009", "En proceso alta", "EN_PROCESO", 4)
         );
 
-        // Referencias a métodos, en sus cuatro variantes
-        // Método estático: Clase::metodoEstatico
+        // =========================================================================================
+        // ==== EN ESTE BLOQUE SE REALIZA: LAS CUATRO VARIANTES DE REFERENCIAS A MÉTODOS ====
+        // 1. Estático, 2. Objeto particular, 3. Instancia arbitraria, 4. Constructor
+        // =========================================================================================
+
+        // 1. Método estático: Clase::metodoEstatico
         Predicate<Incidencia> esCritica = ReglasIncidencia::esCritica;
 
         System.out.println("Predicados sobre la lista de prueba:");
@@ -164,10 +201,10 @@ public class Demostracion {
             System.out.println("    esCritica: " + esCritica.test(i));
         }
 
-        // Método de un objeto particular: objeto::metodo
+        // 2. Método de un objeto particular: objeto::metodo (ejemplo: System.out::println)
         incidencias.forEach(System.out::println);
 
-        // andThen vs compose sobre una misma incidencia
+        // andThen vs compose sobre una misma incidencia para verificar equivalencia
         Incidencia paraFunciones = incidencias.get(0);
         String r1 = resumenMayusculas.apply(paraFunciones);
         String r2 = mismoResultado.apply(paraFunciones);
@@ -175,21 +212,21 @@ public class Demostracion {
         System.out.println("mismoResultado:    " + r2);
         System.out.println("¿andThen y compose coinciden? " + r1.equals(r2));
 
-        // etiqueta para una incidencia de prioridad 4
+        // Aplicación de función compuesta etiqueta (Function.andThen)
         System.out.println("etiqueta (prioridad 4): " + etiqueta.apply(incidencias.get(3)));
 
-        // notificarYRegistrar solo sobre las que cumplen REQUIERE_ATENCION
+        // Aplicación del consumidor encadenado notificarYRegistrar (Consumer.andThen)
         System.out.println("notificarYRegistrar sobre REQUIERE_ATENCION:");
         incidencias.stream()
                 .filter(REQUIERE_ATENCION)
                 .forEach(notificarYRegistrar);
         System.out.println("bitacora: " + bitacora);
 
-        // Método de una instancia arbitraria: Tipo::metodoDeInstancia
+        // 3. Método de una instancia arbitraria: Tipo::metodoDeInstancia
         Function<Incidencia, String> titulo = Incidencia::titulo;
         System.out.println("titulo.apply: " + titulo.apply(paraFunciones));
 
-        // Constructor: Clase::new
+        // 4. Constructor: Clase::new
         Supplier<List<Incidencia>> nuevaLista = ArrayList::new;
         FabricaIncidencia fabrica = Incidencia::new;
         List<Incidencia> creadas = nuevaLista.get();
